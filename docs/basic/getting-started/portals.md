@@ -9,7 +9,7 @@ Using `ReactDOM.createPortal`:
 const modalRoot = document.getElementById("modal-root") as HTMLElement;
 // assuming in your html file has a div with id 'modal-root';
 
-export class Modal extends React.Component {
+export class Modal extends React.Component<{ children?: React.ReactNode }> {
   el: HTMLElement = document.createElement("div");
 
   componentDidMount() {
@@ -34,12 +34,16 @@ export class Modal extends React.Component {
 Same as above but using hooks
 
 ```tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 const modalRoot = document.querySelector("#modal-root") as HTMLElement;
 
-const Modal: React.FC<{}> = ({ children }) => {
+interface ModalProps {
+  children?: ReactNode;
+}
+
+const Modal = ({ children }: ModalProps) => {
   const el = useRef(document.createElement("div"));
 
   useEffect(() => {
@@ -64,8 +68,11 @@ export default Modal;
 Modal Component Usage Example:
 
 ```tsx
+import { useState } from "react";
+
 function App() {
-  const [showModal, setShowModal] = React.useState(false);
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <div>
       // you can also put this in your static html file

@@ -24,7 +24,7 @@ Read [TypeScript's official Guide for migrating from JS](https://www.typescriptl
   - use the loosest, bare minimum settings to start with
 - Level 2: Strict TypeScript
   - use Microsoft's [`dts-gen`](https://github.com/Microsoft/dts-gen) to generate `.d.ts` files for your untyped files. [This SO answer](https://stackoverflow.com/questions/12687779/how-do-you-produce-a-d-ts-typings-definition-file-from-an-existing-javascript) has more on the topic.
-  - use `declare` keyword for ambient declarations - see [declaration merging](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet#troubleshooting-handbook-bugs-in-official-typings) to patch library declarations inline
+  - use `declare` keyword for ambient declarations - see [declaration merging](https://github.com/typescript-cheatsheets/react#troubleshooting-handbook-bugs-in-official-typings) to patch library declarations inline
 
 Misc tips/approaches successful companies have taken
 
@@ -90,6 +90,7 @@ and Code Quality in Github](https://web.cs.ucdavis.edu/~filkov/papers/lang_githu
 
 ## Misc migration stories by notable companies and open source
 
+- (2022) Stripe: https://stripe.com/blog/migrating-to-typescript ([podcast](https://devtools.fm/episode/33), [tweet](https://twitter.com/alunny/status/1501261144341680130))
 - [Bloomberg](https://www.techatbloomberg.com/blog/10-insights-adopting-typescript-at-scale/) - [Podcast form](https://talkscript.sitepen.com/episode-57-typescript-at-scale/)
 - [Adopting TypeScript at Scale - AirBnB's conversion story and strategy](https://www.youtube.com/watch?v=P-J9Eg7hJwE)
 - Airtable's [Big Bang Migration from Flow to TS](https://medium.com/airtable-eng/the-continual-evolution-of-airtables-codebase-migrating-a-million-lines-of-code-to-typescript-612c008baf5c)
@@ -98,7 +99,6 @@ and Code Quality in Github](https://web.cs.ucdavis.edu/~filkov/papers/lang_githu
 - [Tiny][tiny] - [Talk from ForwardJS here](https://www.slideshare.net/tiny/porting-100k-lines-of-code-to-typescript)
 - [Slack](https://slack.engineering/typescript-at-slack-a81307fa288d) ([podcast](https://softwareengineeringdaily.com/2017/08/11/typescript-at-slack-with-felix-rieseberg/))
 - [Etsy](https://codeascraft.com/2021/11/08/etsys-journey-to-typescript/)
-- [Stripe](https://twitter.com/alunny/status/1501261144341680130) - new! 2022!
 - [Netflix adoption story](https://www.youtube.com/watch?v=p5Hwb1YbNMY&feature=share)
 - [Priceline](https://medium.com/priceline-labs/trying-out-typescript-part-1-15a5267215b9)
 - Dropbox

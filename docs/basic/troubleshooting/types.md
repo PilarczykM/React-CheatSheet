@@ -86,7 +86,7 @@ class MyComponent extends React.Component<{
 
 You can also use a `!` character to assert that something is not undefined, but this is not encouraged.
 
-_Something to add? [File an issue](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/issues/new) with your suggestions!_
+_Something to add? [File an issue](https://github.com/typescript-cheatsheets/react/issues/new) with your suggestions!_
 
 ## Enum Types
 
@@ -208,8 +208,8 @@ type DogProps = {
 type HumanProps = {
   handsCount: number
 }
-export const Human: React.FC<BaseProps & HumanProps> = // ...
-export const Dog: React.FC<BaseProps & DogProps> = // ...
+export const Human = (props: BaseProps & HumanProps) => // ...
+export const Dog = (props: BaseProps & DogProps) => // ...
 ```
 
 [View in the TypeScript Playground](https://www.typescriptlang.org/play/?jsx=2#code/JYWwDg9gTgLgBAJQKYEMDG8BmUIjgcilQ3wFgAoCmATzCTgCEUBnJABRzGbgF44BvCnGFoANi2YA5FCCQB+AFxxmMKMAB2AcwA0Q4Suqj5S5OhgA6AMIBlaxwh1YwJMz1x1MpEpVqtcAPT+cACurAAmcBpwAEYQMAAWFAC+VLT0ACIQmvZcvAJ6MCjAosyWEMHqMErqwSDRSFDJqXRwABK1KOo53HyC5MLxnWGl5ZXVtfWN5CnkSAAekLBwaBDqKm0d6ibEFgBilgA8TKzdcABkGyCd3QB8eQAUAJS8d-d6B2HAAG4BNxSPFAo80W8BWa3gmU02zM5n2RxY7E43AukNuD2ePFe70+P38f3IjyAA)
@@ -218,7 +218,7 @@ Make sure not to confuse Intersection Types (which are **and** operations) with 
 
 ## Union Types
 
-This section is yet to be written (please contribute!). Meanwhile, see our [commentary on Union Types usecases](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/blob/master/README.md#union-types-and-type-guarding).
+This section is yet to be written (please contribute!). Meanwhile, see our [commentary on Union Types usecases](https://github.com/typescript-cheatsheets/react/blob/main/README.md#union-types-and-type-guarding).
 
 The ADVANCED cheatsheet also has information on Discriminated Union Types, which are helpful when TypeScript doesn't seem to be narrowing your union type as you expect.
 
@@ -263,7 +263,7 @@ Leaning on TypeScript's Type Inference is great... until you realize you need a 
 Fortunately, with `typeof`, you won't have to do that. Just use it on any value:
 
 ```tsx
-const [state, setState] = React.useState({
+const [state, setState] = useState({
   foo: 1,
   bar: 2,
 }); // state's type inferred to be {foo: number, bar: number}
@@ -280,12 +280,12 @@ const someMethod = (obj: typeof state) => {
 Working with slicing state and props is common in React. Again, you don't really have to go and explicitly redefine your types if you use the `Partial` generic type:
 
 ```tsx
-const [state, setState] = React.useState({
+const [state, setState] = useState({
   foo: 1,
   bar: 2,
 }); // state's type inferred to be {foo: number, bar: number}
 
-// NOTE: stale state merging is not actually encouraged in React.useState
+// NOTE: stale state merging is not actually encouraged in useState
 // we are just demonstrating how to use Partial here
 const partialStateUpdate = (obj: Partial<typeof state>) =>
   setState({ ...state, ...obj });
@@ -311,7 +311,7 @@ This can be annoying but here are ways to grab the types!
 import { Button } from "library"; // but doesn't export ButtonProps! oh no!
 type ButtonProps = React.ComponentProps<typeof Button>; // no problem! grab your own!
 type AlertButtonProps = Omit<ButtonProps, "onClick">; // modify
-const AlertButton: React.FC<AlertButtonProps> = (props) => (
+const AlertButton = (props: AlertButtonProps) => (
   <Button onClick={() => alert("hello")} {...props} />
 );
 ```

@@ -52,14 +52,14 @@ You CAN use `ComponentProps` in place of `ComponentPropsWithRef`, but you may pr
 
 More info: https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/forward_and_create_ref/
 
-### Maybe `JSX.IntrinsicElements` or `React.[Element]HTMLAttributes`
+### Maybe `JSX.IntrinsicElements` or `[Element]HTMLAttributes`
 
 There are at least 2 other equivalent ways to do this, but they are more verbose:
 
 ```tsx
 // Method 1: JSX.IntrinsicElements
-type btnType = JSX.IntrinsicElements["button"]; // cannot inline or will error
-export interface ButtonProps extends btnType {} // etc
+type BtnType = JSX.IntrinsicElements["button"]; // cannot inline or will error
+export interface ButtonProps extends BtnType {} // etc
 
 // Method 2: React.[Element]HTMLAttributes
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
@@ -91,10 +91,12 @@ It infers a too-wide type of `string` for `type`, because it [uses `AllHTMLAttri
 This is what happens when you use `React.HTMLAttributes`:
 
 ```tsx
-export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
+import { HTMLAttributes } from "react";
+
+export interface ButtonProps extends HTMLAttributes<HTMLButtonElement> {
   /* etc */
 }
-// usage
+
 function App() {
   // Property 'type' does not exist on type 'IntrinsicAttributes & ButtonProps'
   return <Button type="submit"> text </Button>;
@@ -110,7 +112,9 @@ function App() {
 Usecase: same as above, but for a React Component you don't have access to the underlying props
 
 ```tsx
-const Box = (props: React.CSSProperties) => <div style={props} />;
+import { CSSProperties } from "react";
+
+const Box = (props: CSSProperties) => <div style={props} />;
 
 const Card = (
   { title, children, ...props }: { title: string } & $ElementProps<typeof Box> // new utility, see below
@@ -153,10 +157,13 @@ _thanks [dmisdm](https://github.com/typescript-cheatsheets/react/issues/23)_
 :new: You should also consider whether to explicitly forward refs:
 
 ```tsx
+import { forwardRef, ReactNode } from "react";
+
 // base button, with ref forwarding
-type Props = { children: React.ReactNode; type: "submit" | "button" };
+type Props = { children: ReactNode; type: "submit" | "button" };
 export type Ref = HTMLButtonElement;
-export const FancyButton = React.forwardRef<Ref, Props>((props, ref) => (
+
+export const FancyButton = forwardRef<Ref, Props>((props, ref) => (
   <button ref={ref} className="MyCustomButtonClass" type={props.type}>
     {props.children}
   </button>
@@ -173,8 +180,10 @@ export function DoubleWrappedButton(props: DoubleWrappedProps) {
 }
 
 // usage
+import { useRef } from "react";
+
 function App() {
-  const btnRef = React.useRef<HTMLButtonElement>(null!);
+  const btnRef = useRef<HTMLButtonElement>(null!);
   return (
     <DoubleWrappedButton type="button" ref={btnRef}>
       {" "}
@@ -216,20 +225,23 @@ For more info you can refer to these resources:
 - https://github.com/kripod/react-polymorphic-box
 - https://stackoverflow.com/questions/58200824/generic-react-typescript-component-with-as-prop-able-to-render-any-valid-dom
 
-[Thanks @eps1lon](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/pull/69) and [@karol-majewski](https://github.com/typescript-cheatsheets/react/issues/151) for thoughts!
+[Thanks @eps1lon](https://github.com/typescript-cheatsheets/react/pull/69) and [@karol-majewski](https://github.com/typescript-cheatsheets/react/issues/151) for thoughts!
 
 ## Generic Components
 
 Just as you can make generic functions and classes in TypeScript, you can also make generic components to take advantage of the type system for reusable type safety. Both Props and State can take advantage of the same generic types, although it probably makes more sense for Props than for State. You can then use the generic type to annotate types of any variables defined inside your function / class scope.
 
 ```tsx
+import { ReactNode, useState } from "react";
+
 interface Props<T> {
   items: T[];
-  renderItem: (item: T) => React.ReactNode;
+  renderItem: (item: T) => ReactNode;
 }
+
 function List<T>(props: Props<T>) {
   const { items, renderItem } = props;
-  const [state, setState] = React.useState<T[]>([]); // You can use type T in List function scope.
+  const [state, setState] = useState<T[]>([]); // You can use type T in List function scope.
   return (
     <div>
       {items.map(renderItem)}
@@ -272,9 +284,11 @@ ReactDOM.render(
 You can also use Generics using fat arrow function style:
 
 ```tsx
+import { ReactNode, useState } from "react";
+
 interface Props<T> {
   items: T[];
-  renderItem: (item: T) => React.ReactNode;
+  renderItem: (item: T) => ReactNode;
 }
 
 // Note the <T extends unknown> before the function definition.
@@ -282,7 +296,7 @@ interface Props<T> {
 // You can also use <T,> https://github.com/microsoft/TypeScript/issues/15713#issuecomment-499474386
 const List = <T extends unknown>(props: Props<T>) => {
   const { items, renderItem } = props;
-  const [state, setState] = React.useState<T[]>([]); // You can use type T in List function scope.
+  const [state, setState] = useState<T[]>([]); // You can use type T in List function scope.
   return (
     <div>
       {items.map(renderItem)}
@@ -296,16 +310,18 @@ const List = <T extends unknown>(props: Props<T>) => {
 The same for using classes: (Credit: [Karol Majewski](https://twitter.com/WrocTypeScript/status/1163234064343736326)'s [gist](https://gist.github.com/karol-majewski/befaf05af73c7cb3248b4e084ae5df71))
 
 ```tsx
+import { PureComponent, ReactNode } from "react";
+
 interface Props<T> {
   items: T[];
-  renderItem: (item: T) => React.ReactNode;
+  renderItem: (item: T) => ReactNode;
 }
 
 interface State<T> {
   items: T[];
 }
 
-class List<T> extends React.PureComponent<Props<T>, State<T>> {
+class List<T> extends PureComponent<Props<T>, State<T>> {
   // You can use type T inside List class.
   state: Readonly<State<T>> = {
     items: [],
@@ -344,79 +360,6 @@ class List<T> extends React.PureComponent<Props<T>, State<T>> {
     return { items: props.items };
   }
 }
-```
-
-### Generic components with children
-
-`children` is usually not defined as a part of the props type. Unless `children` are explicitly defined as a part of the `props` type, an attempt to use `props.children` in JSX or in the function body will fail:
-
-```tsx
-interface WrapperProps<T> {
-  item: T;
-  renderItem: (item: T) => React.ReactNode;
-}
-
-/* Property 'children' does not exist on type 'WrapperProps<T>'. */
-const Wrapper = <T extends {}>(props: WrapperProps<T>) => {
-  return (
-    <div>
-      {props.renderItem(props.item)}
-      {props.children}
-    </div>
-  );
-};
-
-/*
-Type '{ children: string; item: string; renderItem: (item: string) => string; }' is not assignable to type 'IntrinsicAttributes & WrapperProps<string>'.
-  Property 'children' does not exist on type 'IntrinsicAttributes & WrapperProps<string>'.
-*/
-
-const wrapper = (
-  <Wrapper item="test" renderItem={(item) => item}>
-    {test}
-  </Wrapper>
-);
-```
-
-[View in the TypeScript Playground](https://www.typescriptlang.org/play/?jsx=2#code/JYWwDg9gTgLgBAJQKYEMDG8BmUIjgcilQ3wFgAoC4AOxiSk3STgHUoUwx6AFHMAZwA8AFQB8cAN4U4cYHRAAuOMIDc0uEWoATegEl5SgBRyki5QEo4AXnHJ0MAHR2MAOQg615GWgAWwADZamkrOjqFuHhQAvhQUAPQAVHC8EFywAJ4EvgFBSNT4cFoQSPxw1BDwSAAewPzwENRwMOlcBGwcaSkCIqL4DnAJcRRoDXWs7Jz01nAicNV02qUSUaKGYHz8Su2TUF1CYpY2kupEMACuUI2G6jKCWsAAbqI3MpLrqfwOmjpQ+qZrGwcJhA5hiXleMgk7wEDmygU0YIhgji9ye6nMniinniCQowhazHwEjgcNy1CUdSgNAA5ipZAY4JSaXTvnoGcYGUzqNTDuIubS4FECrUyhU4Ch+PxgNTqCgAEb+ZgwCBNAkEXS0KnUKVoACCMBgVLlZzopQAZOMOjwNoJ+b0HOouvRmlk-PC8gUiiVRZUamMGqrWvgNYaaDr9aHjaa4Bbtp0bXa+hRBrFyCNtfBTfArHBDLyZqjRAAJJD+fwqrPIwvDUbwADuEzS02u4MEcamwKsACIs12NHkfn8QFYJMDrOJgSsXhIs4iZnF21BnuQMUA)
-
-To work around that, either add `children` to the `WrapperProps` definition (possibly narrowing down its type, as needed):
-
-```tsx
-interface WrapperProps<T> {
-  item: T;
-  renderItem: (item: T) => React.ReactNode;
-  children: string; // The component will only accept a single string child
-}
-
-const Wrapper = <T extends {}>(props: WrapperProps<T>) => {
-  return (
-    <div>
-      {props.renderItem(props.item)}
-      {props.children}
-    </div>
-  );
-};
-```
-
-or wrap the type of the props in `React.PropsWithChildren` (this is what `React.FC<>` does):
-
-```tsx
-interface WrapperProps<T> {
-  item: T;
-  renderItem: (item: T) => React.ReactNode;
-}
-
-const Wrapper = <T extends {}>(
-  props: React.PropsWithChildren<WrapperProps<T>>
-) => {
-  return (
-    <div>
-      {props.renderItem(props.item)}
-      {props.children}
-    </div>
-  );
-};
 ```
 
 ## Typing Children
@@ -558,7 +501,7 @@ function RouterLink(props: LinkProps | AnchorProps) {
 <details>
   <summary><b>Approach: Generic Components</b></summary>
 
-Here is an example solution, see the further discussion for other solutions. _thanks to [@jpavon](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/issues/12#issuecomment-394440577)_
+Here is an example solution, see the further discussion for other solutions. _thanks to [@jpavon](https://github.com/typescript-cheatsheets/react/issues/12#issuecomment-394440577)_
 
 ```tsx
 interface LinkProps {}
@@ -593,11 +536,12 @@ If you want to conditionally render a component, sometimes is better to use [Rea
 type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
 type RouterLinkProps = Omit<AnchorProps, "href">;
 
-interface Button {
+interface ButtonProps {
   as: React.ComponentClass | "a";
+  children?: React.ReactNode;
 }
 
-const Button: React.FunctionComponent<Button> = (props) => {
+const Button: React.FunctionComponent<ButtonProps> = (props) => {
   const { as: Component, children, ...rest } = props;
   return (
     <Component className="button" {...rest}>
@@ -681,17 +625,20 @@ The above example does not work as we are not checking the value of `event.value
   </summary>
 
 ```tsx
-type SingleElement = {
+import { useMemo } from "react";
+
+interface SingleElement {
   isArray: true;
   value: string[];
-};
-type MultiElement = {
+}
+interface MultiElement {
   isArray: false;
   value: string;
-};
+}
 type Props = SingleElement | MultiElement;
+
 function Sequence(p: Props) {
-  return React.useMemo(
+  return useMemo(
     () => (
       <div>
         value(s):
@@ -702,6 +649,7 @@ function Sequence(p: Props) {
     [p.isArray, p.value] // TypeScript automatically matches the corresponding value type based on dependency change
   );
 }
+
 function App() {
   return (
     <div>
@@ -750,7 +698,7 @@ function MyComponent(props: Props1 | Props2) {
     return <div>{props.bar}</div>;
   }
 }
-const UsageComponent: React.FC = () => (
+const UsageComponent = () => (
   <div>
     <MyComponent foo="foo" />
     <MyComponent bar="bar" />
@@ -788,7 +736,7 @@ You want to allow `expanded` to be passed only if `truncate` is also passed, bec
 Usage example:
 
 ```tsx
-const App: React.FC = () => (
+const App = () => (
   <>
     {/* these all typecheck */}
     <Text>not truncated</Text>
@@ -805,10 +753,12 @@ const App: React.FC = () => (
 You can implement this by function overloads:
 
 ```tsx
-type CommonProps = {
-  children: React.ReactNode;
+import { ReactNode } from "react";
+
+interface CommonProps {
+  children?: ReactNode;
   miscProps?: any;
-};
+}
 
 type NoTruncateProps = CommonProps & { truncate?: false };
 
@@ -896,18 +846,21 @@ There are advanced edge cases if you want to extract the prop types of a compone
 
 > Advice: Where possible, you should try to use Hooks instead of Render Props. We include this merely for completeness.
 
-Sometimes you will want to write a function that can take a React element or a string or something else as a prop. The best Type to use for such a situation is `React.ReactNode` which fits anywhere a normal, well, React Node would fit:
+Sometimes you will want to write a function that can take a React element or a string or something else as a prop. The best Type to use for such a situation is `ReactNode` which fits anywhere a normal, well, React Node would fit:
 
 ```tsx
-export interface Props {
-  label?: React.ReactNode;
-  children: React.ReactNode;
+import { ReactNode } from "react";
+
+interface Props {
+  label?: ReactNode;
+  children?: ReactNode;
 }
-export const Card = (props: Props) => {
+
+const Card = ({ children, label }: Props) => {
   return (
     <div>
-      {props.label && <div>{props.label}</div>}
-      {props.children}
+      {label && <div>{label}</div>}
+      {children}
     </div>
   );
 };
@@ -916,12 +869,14 @@ export const Card = (props: Props) => {
 If you are using a function-as-a-child render prop:
 
 ```tsx
-export interface Props {
-  children: (foo: string) => React.ReactNode;
+import { ReactNode } from "react";
+
+interface Props {
+  children: (foo: string) => ReactNode;
 }
 ```
 
-[Something to add? File an issue](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/issues/new/choose).
+[Something to add? File an issue](https://github.com/typescript-cheatsheets/react/issues/new/choose).
 
 ## Handling Exceptions
 
