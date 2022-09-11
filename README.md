@@ -55,7 +55,7 @@ Cheatsheets for experienced React developers getting started with TypeScript
 
 <summary><b>Expand Table of Contents</b></summary>
 
-- [Section 1: Setup TypeScript with React](#section-1--setup-typescript-with-react)
+- [Section 1: Setup TypeScript with React](#section-1-setup-typescript-with-react)
   <!--START-SECTION:setup-toc-->
   - [Prerequisites](#prerequisites)
   - [VS Code Extensions](#vs-code-extensions)
@@ -559,21 +559,52 @@ function Foo() {
 
 #### useImperativeHandle
 
-_We don't have much here, but this is from [a discussion in our issues](https://github.com/typescript-cheatsheets/react/issues/106). Please contribute if you have anything to add!_
+Based on this [Stackoverflow answer](https://stackoverflow.com/a/69292925/5415299):
 
 ```tsx
-type ListProps<ItemType> = {
-  items: ItemType[];
-  innerRef?: React.Ref<{ scrollToItem(item: ItemType): void }>;
+// Countdown.tsx
+
+// Define the handle types which will be passed to the forwardRef
+export type CountdownHandle = {
+  start: () => void;
 };
 
-function List<ItemType>(props: ListProps<ItemType>) {
-  useImperativeHandle(props.innerRef, () => ({
-    scrollToItem() {},
+type CountdownProps = {};
+
+const Countdown = forwardRef<CountdownHandle, CountdownProps>((props, ref) => {
+  useImperativeHandle(ref, () => ({
+    // start() has type inference here
+    start() {
+      alert("Start");
+    },
   }));
-  return null;
+
+  return <div>Countdown</div>;
+});
+```
+
+```tsx
+// The component uses the Countdown component
+
+import Countdown, { CountdownHandle } from "./Countdown.tsx";
+
+function App() {
+  const countdownEl = useRef<CountdownHandle>(null);
+
+  useEffect(() => {
+    if (countdownEl.current) {
+      // start() has type inference here as well
+      countdownEl.current.start();
+    }
+  }, []);
+
+  return <Countdown ref={countdownEl} />;
 }
 ```
+
+##### See also:
+
+- [Using ForwardRefRenderFunction](https://stackoverflow.com/a/62258685/5415299)
 
 #### Custom Hooks
 
@@ -2689,7 +2720,7 @@ Selected flags and why we like them:
 - `strict`: `strictPropertyInitialization` forces you to initialize class properties or explicitly declare that they can be undefined. You can opt out of this with a definite assignment assertion.
 - `"typeRoots": ["./typings", "./node_modules/@types"]`: By default, TypeScript looks in `node_modules/@types` and parent folders for third party type declarations. You may wish to override this default resolution so you can put all your global type declarations in a special `typings` folder.
 
-Compilation speed grows linearly with size of codebase. For large projects, you will want to use [Project References](https://www.typescriptlang.org/docs/handbook/project-references.html). See our [ADVANCED](https://react-typescript-cheatsheet.netlify.app/docs/advanced/intro/) cheatsheet for commentary.
+Compilation time grows linearly with size of codebase. For large projects, you will want to use [Project References](https://www.typescriptlang.org/docs/handbook/project-references.html). See our [ADVANCED](https://react-typescript-cheatsheet.netlify.app/docs/advanced/intro/) cheatsheet for commentary.
 
 <!--END-SECTION:ts-config-->
 
